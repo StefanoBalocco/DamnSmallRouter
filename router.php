@@ -43,6 +43,26 @@ class Router
 
 	}
 
+	private static function CalculateWeight( $route )
+	{
+		$returnValue = null;
+		$route = preg_replace( '/[\w]+/', '', $route );
+		$last = 0;
+		while( false !== ( $last = strpos( $route, '@', $last + 1 ) ) )
+		{
+			$returnValue = dechex( $last + 1 ) . $returnValue;
+			if( 0 == strlen( $returnValue ) )
+			{
+				$returnValue = '00';
+			}
+			elseif( ( 1 == ( strlen( $returnValue ) % 2 ) ) )
+			{
+				$returnValue = '0' . $returnValue;
+			}
+		}
+		return ( strlen( $returnValue ) ? $returnValue : '00' );
+	}
+
 	public static function GetInstance( )
 	{
 		if( !self::$instance )
@@ -112,31 +132,12 @@ class Router
 	{
 		$routes = &self::GetInstance( )->routes;
 		$id = md5( $route );
-		if( !array_key_exists( $id, $route ) )
+		if( !array_key_exists( $id, $routes ) )
 		{
-			function CalculateWeight( $route )
-			{
-				$returnValue = null;
-				$route = preg_replace( '/[\w]+/', '', $route );
-				$last = 0;
-				while( false !== ( $last = strpos( $route, '@', $last + 1 ) ) )
-				{
-					$returnValue = dechex( $last + 1 ) . $returnValue;
-					if( 0 == strlen( $returnValue ) )
-					{
-						$returnValue = '00';
-					}
-					elseif( ( 1 == ( strlen( $returnValue ) % 2 ) ) )
-					{
-						$returnValue = '0' . $returnValue;
-					}
-				}
-				return ( strlen( $returnValue ) ? $returnValue : '00' );
-			}
 			$routes[ $id ] = array
 			(
 				'regex' => '@^' . preg_replace( '/@([\w]+)/', '([^\/]+)', preg_quote( $route ) ) . '$@',
-				'weight' => CalculateWeight( $route ),
+				'weight' => self::CalculateWeight( $route ),
 				'methods' => array( )
 			);
 		}

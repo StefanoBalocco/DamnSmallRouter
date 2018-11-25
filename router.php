@@ -110,7 +110,7 @@ class Router
 	{
 		$returnValue = null;
 		$route = preg_replace( '/[\w]+/', '', $route );
-		$last = 0;
+		$last = -1;
 		while( false !== ( $last = strpos( $route, '@', $last + 1 ) ) )
 		{
 			$returnValue = dechex( $last + 1 ) . $returnValue;
@@ -191,7 +191,7 @@ class Router
 		self::GetInstance( )->route500 = array( $callback, $variables );
 	}
 
-	public static function AddRoute( $route, $callback, $variables = array( ), $method = 'GET', $available = true )
+	public static function AddRoute( $route, $callback, $variables = array( ), $method = 'GET', $available = null )
 	{
 		$routes = &self::GetInstance( )->routes;
 		$id = md5( $route );
@@ -199,12 +199,40 @@ class Router
 		{
 			$routes[ $id ] = array
 			(
-				'regex' => '@^' . preg_replace( '/@([\w]+)/', '([^\/]+)', preg_quote( $route ) ) . '$@',
+				'regex' => '@^' . preg_replace( '/#AZ09#/', '([\w,]+)', preg_replace( '/#AZ#/', '([a-zA-Z]+)', preg_replace( '/#09#/', '(\d+)', preg_quote( $route ) ) ) ) . '$@',
 				'weight' => self::CalculateWeight( $route ),
 				'methods' => array( )
 			);
 		}
-		$routes[ $id ][ 'methods' ][ $method ] = array( $callback, $variables, $available );
+		if( !isset( $routes[ $id ][ 'methods' ][ $method ] ) || !$routes[ $id ][ 'methods' ][ $method ][ 2 ] )
+		{
+			$routes[ $id ][ 'methods' ][ $method ] = array( $callback, $variables, $available );
+		}
+	}
+
+	public static function RouteAvailable( $method = 'GET', $withoutConditions = false )
+	{
+		$returnValue = false;
+		$routes = self::GetInstance( )->routes;
+		$callback = array( null, null, null );
+		foreach( $routes as $route )
+		{
+			$matches = array( );
+			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( is_null( $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) )
+			{
+				if( array_key_exists( $method, $route[ 'methods' ] ) )
+				{
+					if( is_null( $route[ 'methods' ][ $method ][ 2 ] ) || ( !$withoutConditions && $route[ 'methods' ][ $method ][ 2 ] ) )
+					{
+						if( is_callable( $route[ 'methods' ][ $method ][ 0 ] ) )
+						{
+							$returnValue = true;
+						}
+					}
+				}
+			}
+		}
+		return $returnValue;
 	}
 
 	public static function Route( )
@@ -216,11 +244,11 @@ class Router
 		foreach( $routes as $route )
 		{
 			$matches = array( );
-			if( preg_match( $route[ 'regex' ], $_SERVER[ 'PATH_INFO' ], $matches ) && ( is_null( $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) )
+			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( is_null( $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) )
 			{
 				if( array_key_exists( $method, $route[ 'methods' ] ) )
 				{
-					if( $route[ 'methods' ][ $method ][ 2 ] )
+					if( is_null( $route[ 'methods' ][ $method ][ 2 ] ) || $route[ 'methods' ][ $method ][ 2 ] )
 					{
 						if( is_callable( $route[ 'methods' ][ $method ][ 0 ] ) )
 						{

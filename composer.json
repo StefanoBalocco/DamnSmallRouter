@@ -1,7 +1,7 @@
 {
 	"name": "stefanobalocco/damnsmallrouter",
 	"type": "library",
-	"description": "",
+	"description": "A really simple and small pathinfo php router",
 	"homepage": "https://github.com/StefanoBalocco/DamnSmallRouter",
 	"license": "BSD-3-Clause",
 	"authors":

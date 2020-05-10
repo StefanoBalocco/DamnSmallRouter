@@ -1,0 +1,21 @@
+{
+	"name": "StefanoBalocco/DamnSmallRouter",
+	"type": "library",
+	"description": "",
+	"homepage": "https://github.com/StefanoBalocco/DamnSmallRouter",
+	"license": "BSD-3-Clause",
+	"authors":
+	[
+		{
+			"name": "Stefano Balocco",
+			"email": "stefano.balocco@gmail.com"
+		}
+	],
+	"autoload":
+	{
+		"psr-4":
+		{
+			"StefanoBalocco\\DamnSmallRouter\\": "./"
+		}
+	}
+}

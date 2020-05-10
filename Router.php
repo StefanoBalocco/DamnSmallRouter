@@ -29,6 +29,8 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+namespace StefanoBalocco\DamnSmallRouter;
+
 if( !function_exists( 'http_response_code' ) )
 {
 	function http_response_code( $code = NULL )
@@ -88,9 +90,10 @@ if( !function_exists( 'http_response_code' ) )
 		{
 			$code = ( isset( $GLOBALS[ 'http_response_code' ] ) ? $GLOBALS[ 'http_response_code' ] : 200 );
 		}
-		return $code;
+		return( $code );
 	}
 }
+
 class Router
 {
 	private static $instance;
@@ -123,7 +126,7 @@ class Router
 				$returnValue = '0' . $returnValue;
 			}
 		}
-		return ( strlen( $returnValue ) ? $returnValue : '00' );
+		return( strlen( $returnValue ) ? $returnValue : '00' );
 	}
 
 	public static function GetInstance( )
@@ -168,7 +171,7 @@ class Router
 				array( )
 			);
 		}
-		return self::$instance;
+		return( self::$instance );
 	}
 
 	public static function AddRoute403( $callback, $variables = array( ) )
@@ -232,7 +235,7 @@ class Router
 				}
 			}
 		}
-		return $returnValue;
+		return( $returnValue );
 	}
 
 	public static function Route( )
@@ -286,7 +289,6 @@ class Router
 		{
 			$returnValue = call_user_func_array( $callback[ 0 ], $callback[ 1 ] );
 		}
-		return $returnValue;
+		return( $returnValue );
 	}
 }
-?>

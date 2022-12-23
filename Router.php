@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright (c) 2014-2018, Stefano Balocco <stefano.balocco@gmail.com>
+   Copyright (c) 2014-2022, Stefano Balocco <stefano.balocco@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -200,9 +200,13 @@ class Router
 		$id = md5( $route );
 		if( !array_key_exists( $id, $routes ) )
 		{
+			$delimiter = '#';
+			if( PHP_VERSION_ID >= 70300) {
+				$delimiter = '\\#';
+			}
 			$routes[ $id ] = array
 			(
-				'regex' => '@^' . preg_replace( '/#AZ09#/', '([\w,]+)', preg_replace( '/#AZ#/', '([a-zA-Z]+)', preg_replace( '/#09#/', '(\d+)', preg_quote( $route ) ) ) ) . '$@',
+				'regex' => '@^' . str_replace( array( $delimiter . 'AZ09' . $delimiter, $delimiter . 'AZ' . $delimiter, $delimiter . '09' . $delimiter), array( '([\w,]+)', '([a-zA-Z]+)', '(\d+)' ), preg_quote( $route ) ) . '$@',
 				'weight' => self::CalculateWeight( $route ),
 				'methods' => array( )
 			);

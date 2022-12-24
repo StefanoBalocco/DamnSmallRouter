@@ -185,9 +185,9 @@ class Router {
 		$callback = array( null, null, null );
 		foreach( $routes as $route ) {
 			$matches = array( );
-			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( is_null( $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) ) {
+			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( ( null === $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) ) {
 				if( array_key_exists( $method, $route[ 'methods' ] ) ) {
-					if( is_null( $route[ 'methods' ][ $method ][ 2 ] ) || ( !$withoutConditions && $route[ 'methods' ][ $method ][ 2 ] ) ) {
+					if( ( null === $route[ 'methods' ][ $method ][ 2 ] ) || ( !$withoutConditions && $route[ 'methods' ][ $method ][ 2 ] ) ) {
 						if( is_callable( $route[ 'methods' ][ $method ][ 0 ] ) ) {
 							$returnValue = true;
 						}
@@ -205,9 +205,9 @@ class Router {
 		$callback = array( null, null, null );
 		foreach( $routes as $route ) {
 			$matches = array( );
-			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( is_null( $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) ) {
+			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( ( null === $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) ) {
 				if( array_key_exists( $method, $route[ 'methods' ] ) ) {
-					if( is_null( $route[ 'methods' ][ $method ][ 2 ] ) || $route[ 'methods' ][ $method ][ 2 ] ) {
+					if( ( null === $route[ 'methods' ][ $method ][ 2 ] ) || $route[ 'methods' ][ $method ][ 2 ] ) {
 						if( is_callable( $route[ 'methods' ][ $method ][ 0 ] ) ) {
 							$callback = array(
 								$route[ 'methods' ][ $method ][ 0 ],
@@ -228,10 +228,10 @@ class Router {
 				}
 			}
 		}
-		if( is_null( $callback[ 0 ] ) ) {
+		if( null === $callback[ 0 ] ) {
 			$callback = self::GetInstance( )->route404;
 		}
-		if( !is_null( $callback[ 0 ] ) ) {
+		if( null !== $callback[ 0 ] ) {
 			$returnValue = call_user_func_array( $callback[ 0 ], $callback[ 1 ] );
 		}
 		return $returnValue;

@@ -4,7 +4,7 @@
 	"description": "A really simple and small pathinfo php router",
 	"homepage": "https://github.com/StefanoBalocco/DamnSmallRouter",
 	"license": "BSD-3-Clause",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"authors":
 	[
 		{

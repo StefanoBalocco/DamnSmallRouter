@@ -99,7 +99,7 @@ class Router {
 	private function __construct( ) { }
 
 	private static function CalculateWeight( $route ) {
-		$returnValue = null;
+		$returnValue = '';
 		$route = preg_replace( '/[\w]+/', '', $route );
 		$last = -1;
 		while( false !== ( $last = strpos( $route, '@', $last + 1 ) ) ) {

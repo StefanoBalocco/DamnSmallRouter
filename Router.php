@@ -1,6 +1,6 @@
 <?php
 /*
-   Copyright (c) 2014-2022, Stefano Balocco <stefano.balocco@gmail.com>
+   Copyright (c) 2014-2024, Stefano Balocco <stefano.balocco@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without

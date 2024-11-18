@@ -14,14 +14,14 @@ A really simple and small pathinfo php router
 ## Installation
 You can install the library via Composer by running:
 ```bash
-composer require stefanobalocco/damn-small-router
+composer require stefanobalocco/damnsmallrouter
 ```
 
 Or add it to your `composer.json`:
 ```json
 {
     "require": {
-        "stefanobalocco/damn-small-router": "^1.0"
+        "stefanobalocco/damnsmallrouter": "^1.0"
     }
 }
 ```

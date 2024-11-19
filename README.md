@@ -41,11 +41,11 @@ $router = Router::GetInstance();
 ### Adding Routes
 ```php
 Router::AddRoute(
-    '/path/example/#09#', // Route pattern with placeholders
-    function($parameter1) { /* route handling */ }, // Callback
-    [], // Additional variables (optional)
+    '/profile/#09#', // Route pattern with placeholders
+    'functionNameToCall', // Callback
+    [], // Additional parameters to the callback (optional)
     'GET', // HTTP method (default: GET)
-    true // Route availability (optional)
+    $GLOBALS[ 'user_is_logged' ] // Route availability (optional, default true)
 );
 ```
 
@@ -57,10 +57,10 @@ Router::AddRoute(
 ### Error Handling
 ```php
 // Customize error responses
-Router::AddRoute403(function() { /* 403 handling */ });
-Router::AddRoute404(function() { /* 404 handling */ });
-Router::AddRoute405(function() { /* 405 handling */ });
-Router::AddRoute500(function() { /* 500 handling */ });
+Router::AddRoute403( 'functionNameToCall', [ '403', $additional, $parameters ] );
+Router::AddRoute404( 'functionNameToCall', [ '404, $additional, $parameters ] );
+Router::AddRoute405( 'functionNameToCall', [ '405, $additional, $parameters ] );
+Router::AddRoute500( 'functionNameToCall500', [ $additional, $parameters ] );
 ```
 
 ### Router Execution

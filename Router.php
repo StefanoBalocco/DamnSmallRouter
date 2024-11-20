@@ -88,16 +88,6 @@ if( !function_exists( 'http_response_code' ) ) {
 }
 
 class Router {
-	private static $instance;
-
-	protected $routes = array( );
-	protected $route403 = array( null, null );
-	protected $route404 = array( null, null );
-	protected $route405 = array( null, null );
-	protected $route500 = array( null, null );
-
-	private function __construct( ) { }
-
 	private static function CalculateWeight( $route ) {
 		$returnValue = '';
 		$route = preg_replace( '/[\w]+/', '', $route );
@@ -113,77 +103,57 @@ class Router {
 		return ( strlen( $returnValue ) ? $returnValue : '00' );
 	}
 
-	public static function GetInstance( ) {
-		if( !self::$instance ) {
-			self::$instance = new self( );
-			self::$instance->AddRoute403 (
-				function( ) {
-					http_response_code( 403 );
-					return null;
-				},
-				array( )
-			);
-			self::$instance->AddRoute404 (
-				function( ) {
-					http_response_code( 404 );
-					return null;
-				},
-				array( )
-			);
-			self::$instance->AddRoute405 (
-				function( ) {
-					http_response_code( 405 );
-					return null;
-				},
-				array( )
-			);
-			self::$instance->AddRoute500(
-				function( ) {
-					http_response_code( 500 );
-					return null;
-				},
-				array( )
-			);
+	protected $routes = array( );
+	protected $route403 = array( null, null );
+	protected $route404 = array( null, null );
+	protected $route405 = array( null, null );
+	protected $route500 = array( null, null );
+
+	public function __construct( ) {
+		$standardErrorRoute = function( $code ) {
+			http_response_code( 403 );
+			return null;
 		}
-		return self::$instance;
+		$this->AddRoute403( $standardErrorRoute, [ 403 ] );
+		$this->AddRoute404( $standardErrorRoute, [ 404 ] );
+		$this->AddRoute405( $standardErrorRoute, [ 405 ] );
+		$this->AddRoute500( $standardErrorRoute, [ 500 ] );
 	}
 
-	public static function AddRoute403( $callback, $variables = array( ) ) {
-		self::GetInstance( )->route403 = array( $callback, $variables );
+	public function AddRoute403( $callback, $variables = array( ) ) {
+		$this->route403 = array( $callback, $variables );
 	}
 
-	public static function AddRoute404( $callback, $variables = array( ) ) {
-		self::GetInstance( )->route404 = array( $callback, $variables );
+	public AddRoute404( $callback, $variables = array( ) ) {
+		$this->route404 = array( $callback, $variables );
 	}
 
-	public static function AddRoute405( $callback, $variables = array( ) ) {
-		self::GetInstance( )->route405 = array( $callback, $variables );
+	public function AddRoute405( $callback, $variables = array( ) ) {
+		$this->route405 = array( $callback, $variables );
 	}
 
-	public static function AddRoute500( $callback, $variables = array( ) ) {
-		self::GetInstance( )->route500 = array( $callback, $variables );
+	public function AddRoute500( $callback, $variables = array( ) ) {
+		$this->route500 = array( $callback, $variables );
 	}
 
-	public static function AddRoute( $route, $callback, $variables = array( ), $method = 'GET', $available = null ) {
-		$routes = &self::GetInstance( )->routes;
+	public function AddRoute( $route, $callback, $variables = array( ), $method = 'GET', $available = null ) {
 		$id = md5( $route );
-		if( !array_key_exists( $id, $routes ) ) {
-			$routes[ $id ] = array (
-				'regex' => '@^' . str_replace( array( '#AZ09#', '#AZ#', '#09#' ), array( '([\w,]+)', '([a-zA-Z]+)', '(\d+)' ), preg_quote( $route ) ) . '$@',
+		if( !array_key_exists( $id, $this->routes ) ) {
+			$this->routes[ $id ] = array (
+				'regex' => '@^' . str_replace( array( '#AZ09#', '#AZ#', '#09#' ), array( '([\w]+)', '([a-zA-Z]+)', '(\d+)' ), preg_quote( $route ) ) . '$@',
 				'weight' => self::CalculateWeight( $route ),
 				'methods' => array( )
 			);
 		}
-		if( !isset( $routes[ $id ][ 'methods' ][ $method ] ) || !$routes[ $id ][ 'methods' ][ $method ][ 2 ] ) {
-			$routes[ $id ][ 'methods' ][ $method ] = array( $callback, $variables, $available );
+		if( !isset( $this->routes[ $id ][ 'methods' ][ $method ] ) || !$this->routes[ $id ][ 'methods' ][ $method ][ 2 ] ) {
+			$this->routes[ $id ][ 'methods' ][ $method ] = array( $callback, $variables, $available );
 		}
 	}
 
-	public static function RouteAvailable( $method = 'GET', $withoutConditions = false ) {
+	public function RouteAvailable( $method = 'GET', $withoutConditions = false ) {
 		$returnValue = false;
-		$routes = self::GetInstance( )->routes;
 		$callback = array( null, null, null );
-		foreach( $routes as $route ) {
+		foreach( $this->routes as $route ) {
 			$matches = array( );
 			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( ( null === $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) ) {
 				if( array_key_exists( $method, $route[ 'methods' ] ) ) {
@@ -198,12 +168,11 @@ class Router {
 		return $returnValue;
 	}
 
-	public static function Route( ) {
+	public function Route( ) {
 		$returnValue = null;
-		$routes = self::GetInstance( )->routes;
 		$method = ( ( 'HEAD' == $_SERVER[ 'REQUEST_METHOD' ] ) ? 'GET' : $_SERVER[ 'REQUEST_METHOD' ] );
 		$callback = array( null, null, null );
-		foreach( $routes as $route ) {
+		foreach( $this->routes as $route ) {
 			$matches = array( );
 			if( preg_match( $route[ 'regex' ], ( isset( $_SERVER[ 'PATH_INFO' ] ) ? $_SERVER[ 'PATH_INFO' ] : '' ), $matches ) && ( ( null === $callback[ 2 ] ) || ( $callback[ 2 ] > $route[ 'weight' ] ) ) ) {
 				if( array_key_exists( $method, $route[ 'methods' ] ) ) {
@@ -215,21 +184,21 @@ class Router {
 								$route[ 'weight' ]
 							);
 						} else {
-							$callback = self::GetInstance( )->route500;
+							$callback = $this->route500;
 							$callback[ 2 ] = $route[ 'weight' ];
 						}
 					} else {
-						$callback = self::GetInstance( )->route403;
+						$callback = $this->route403;
 						$callback[ 2 ] = $route[ 'weight' ];
 					}
 				} else {
-					$callback = self::GetInstance( )->route405;
+					$callback = $this->route405;
 					$callback[ 2 ] = $route[ 'weight' ];
 				}
 			}
 		}
 		if( null === $callback[ 0 ] ) {
-			$callback = self::GetInstance( )->route404;
+			$callback = $this->route404;
 		}
 		if( null !== $callback[ 0 ] ) {
 			$returnValue = call_user_func_array( $callback[ 0 ], $callback[ 1 ] );

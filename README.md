@@ -3,89 +3,98 @@ DamnSmallRouter
 
 A really simple and small pathinfo php router
 
-## Key Features
-- Pattern matching with placeholder support
-- Automatic HTTP status code handling
-- Support for multiple HTTP methods
-- Singleton pattern for router instance
-- Customizable error handling
-- Route weighting for prioritization
-
 ## Installation
-You can install the library via Composer by running:
+Install via Composer:
 ```bash
-composer require stefanobalocco/damnsmallrouter
+composer require stefanobalocco/damn-small-router
 ```
 
-Or add it to your `composer.json`:
+Or add to `composer.json`:
 ```json
 {
     "require": {
-        "stefanobalocco/damnsmallrouter": "^1.0"
+        "stefanobalocco/damn-small-router": "^1.0"
     }
 }
 ```
 
-Then run `composer install` or `composer update`.
-
-After installation, you can use the library via the `StefanoBalocco\DamnSmallRouter` namespace.
+Run `composer install` or `composer update`.
 
 ## Basic Usage
 
 ### Initialization
 ```php
 use StefanoBalocco\DamnSmallRouter\Router;
-$router = Router::GetInstance();
+$router = new Router();
 ```
 
 ### Adding Routes
 ```php
-Router::AddRoute(
-    '/profile/#09#', // Route pattern with placeholders
-    'functionNameToCall', // Callback
-    [], // Additional parameters to the callback (optional)
-    'GET', // HTTP method (default: GET)
-    $GLOBALS[ 'user_is_logged' ] // Route availability (optional, default true)
+// Simple route with numeric placeholder
+$router->AddRoute(
+    '/user/#09#',                   // Route pattern
+    function($userId, $isLogged) {  // Callback
+        $user = getUserFromDatabase($userId);
+        return renderUserProfile($user);
+    }, 
+    [ isLogged() ],                  // Additional variables (optional)
+    'GET',                           // HTTP method (default: GET)
+    $isAuthorized                    // Route availability (optional)
 );
+
+// Multiple methods for same route
+$router->AddRoute('/profile', $profileGetHandler, [], 'GET');
+$router->AddRoute('/profile', $profileUpdateHandler, [], 'POST');
+
+// Conditional route availability
+$router->AddRoute('/admin', $adminHandler, [], 'GET', userIsAdmin());
 ```
 
-### Available Placeholders
-- `#09#`: Numbers (`\d+`)
-- `#AZ#`: Letters (`[a-zA-Z]+`)
-- `#AZ09#`: Alphanumeric characters (`[\w,]+`)
-
 ### Error Handling
+Default error routes set HTTP response codes and return null. Customize them:
 ```php
-// Customize error responses
-Router::AddRoute403( 'functionNameToCall', [ '403', $additional, $parameters ] );
-Router::AddRoute404( 'functionNameToCall', [ '404, $additional, $parameters ] );
-Router::AddRoute405( 'functionNameToCall', [ '405, $additional, $parameters ] );
-Router::AddRoute500( 'functionNameToCall500', [ $additional, $parameters ] );
+$router->AddRoute403(function() { 
+    http_response_code(403);
+    return renderErrorPage("Access forbidden", 403);
+});
+
+$router->AddRoute404(function() { 
+    http_response_code(404);
+    return renderErrorPage("Page not found", 404);
+});
 ```
 
 ### Router Execution
 ```php
-$response = Router::Route();
+echo $router->Route(); // Display the routed page
 ```
 
-## Important Notes
-- Routes are evaluated based on their "weight" calculated from pattern complexity
-- The library automatically handles HEAD requests as GET
-- If a route is not available (parameter `available` set to `false`), it generates a 403
-- If the HTTP method doesn't match, it generates a 405
-- If no route matches, it generates a 404
-- If the callback is not executable, it generates a 500
+## Key Features
+- Instance-based routing
+- Pattern matching with placeholder support
+- Automatic HTTP status code handling
+- Support for multiple HTTP methods
+- Customizable error handling
+- Route weighting for prioritization
+- Automatic HEAD request handling (converted to GET)
 
-## Available Methods
+## Available Placeholders
+- `#09#`: Numbers (`\d+`)
+- `#AZ#`: Letters (`[a-zA-Z]+`)
+- `#AZ09#`: Alphanumeric characters (`[\w]+`)
 
-### `Router::GetInstance()`
-Gets the singleton instance of the router.
+## Methods
 
-### `Router::AddRoute($route, $callback, $variables = [], $method = 'GET', $available = null)`
-Adds a new route.
+### `AddRoute($route, $callback, $variables = [], $method = 'GET', $available = null)`
+Adds a new route with:
+- `$route`: URL pattern
+- `$callback`: Function to execute
+- `$variables`: Additional variables
+- `$method`: HTTP method
+- `$available`: Route condition
 
-### `Router::RouteAvailable($method = 'GET', $withoutConditions = false)`
+### `RouteAvailable($method = 'GET', $withoutConditions = false)`
 Checks if a route is available for the current path.
 
-### `Router::Route()`
+### `Route()`
 Executes routing for the current request and returns the callback result.

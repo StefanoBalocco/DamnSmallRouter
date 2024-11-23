@@ -113,7 +113,7 @@ class Router {
 		$standardErrorRoute = function( $code ) {
 			http_response_code( 403 );
 			return null;
-		}
+		};
 		$this->AddRoute403( $standardErrorRoute, [ 403 ] );
 		$this->AddRoute404( $standardErrorRoute, [ 404 ] );
 		$this->AddRoute405( $standardErrorRoute, [ 405 ] );
@@ -124,7 +124,7 @@ class Router {
 		$this->route403 = array( $callback, $variables );
 	}
 
-	public AddRoute404( $callback, $variables = array( ) ) {
+	public function AddRoute404( $callback, $variables = array( ) ) {
 		$this->route404 = array( $callback, $variables );
 	}
 

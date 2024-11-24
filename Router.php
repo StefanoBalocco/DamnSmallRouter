@@ -93,12 +93,7 @@ class Router {
 		$route = preg_replace( '/[\w]+/', '', $route );
 		$last = -1;
 		while( false !== ( $last = strpos( $route, '@', $last + 1 ) ) ) {
-			$returnValue = dechex( $last + 1 ) . $returnValue;
-			if( 0 == strlen( $returnValue ) ) {
-				$returnValue = '00';
-			} elseif( ( 1 == ( strlen( $returnValue ) % 2 ) ) ) {
-				$returnValue = '0' . $returnValue;
-			}
+			$returnValue = str_pad( dechex( $last + 1 ), 2, '0', STR_PAD_LEFT ) . $returnValue;
 		}
 		return ( strlen( $returnValue ) ? $returnValue : '00' );
 	}
